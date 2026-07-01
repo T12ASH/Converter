@@ -24,7 +24,7 @@ void Temperature::set_type(Type type) {
     _type = type;
 }
 
-void Temperature::set_temperature(double temperature) {
+void Temperature::set_value(double temperature) {
     if ((temperature < -273.15) && (_type == C)) {
         throw std::invalid_argument(
             "Celsius cannot be lesser than -273.15");
@@ -38,7 +38,7 @@ void Temperature::set_temperature(double temperature) {
     _temperature = temperature;
 }
 
-double Temperature::get_temperature() const {
+double Temperature::get_value() const {
     return _temperature;
 }
 

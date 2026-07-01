@@ -30,7 +30,7 @@ void Length::set_type(Type type) {
     _type = type;
 }
 
-void Length::set_length(double length) {
+void Length::set_value(double length) {
     if (length < 0) {
         throw std::invalid_argument(
             "Length cannot be negative");
@@ -38,7 +38,7 @@ void Length::set_length(double length) {
     _length = length;
 }
 
-double Length::get_length() const {
+double Length::get_value() const {
     return _length;
 }
 

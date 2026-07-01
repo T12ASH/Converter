@@ -22,9 +22,9 @@ public:
     {  }
 
     void set_type(Type type);
-    void set_temperature(double temperature);
+    void set_value(double temperature);
 
-    double get_temperature() const;
+    double get_value() const;
     Type get_type() const;
 
     static Type define_uon(const char* str, bool& uon);

@@ -23,9 +23,9 @@ public:
     {  }
 
     void set_type(Type type);
-    void set_length(double length);
+    void set_value(double length);
 
-    double get_length() const;
+    double get_value() const;
     Type get_type() const;
 
     static Type define_uon(const char* str, bool& uon);

@@ -30,7 +30,7 @@ void Weight::set_type(Type type) {
     _type = type;
 }
 
-void Weight::set_weight(double weight) {
+void Weight::set_value(double weight) {
     if (weight < 0) {
         throw std::invalid_argument(
             "Weight cannot be negative");
@@ -38,7 +38,7 @@ void Weight::set_weight(double weight) {
     _weight = weight;
 }
 
-double Weight::get_weight() const {
+double Weight::get_value() const {
     return _weight;
 }
 

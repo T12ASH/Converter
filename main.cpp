@@ -1,148 +1,17 @@
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 
 #include "length.h"
 #include "temperature.h"
 #include "weight.h"
 
-void print_usage() {
-    std::cout <<
-        "Usage: converter <type> <value> <from> <to>"
-              <<
-        std::endl;
-    std::cout <<
-        "  type: temperature | weight | length"
-              <<
-        std::endl;
-    std::cout <<
-        "  temperature units: C, F, K"
-              <<
-        std::endl;
-    std::cout <<
-        "  weight units: kg, lb, g, oz"
-              <<
-        std::endl;
-    std::cout <<
-        "  length units: km, m, cm, mm"
-              <<
-        std::endl;
-    std::cout <<
-        "Example: converter temperature 100 C F"
-              <<
-        std::endl;
-}
+enum class Types { Temperature, Weight, Length };
 
-
-enum Types {
-    temperature,
-    weight,
-    length
-};
-
-void error_print(bool for_type1, bool for_type2) {
-    if(!for_type1) {
-        std::cout <<
-            "Error: param1 is wrong"
-                  <<
-            std::endl;
-    }
-    if(!for_type2) {
-        std::cout <<
-            "Error: param2 is wrong"
-                  <<
-            std::endl;
-    }
-}
-
-bool convert(Types types, double value,
-             const char* from, const char* to) {
-    switch(types) {
-        case temperature: {
-            bool for_type1, for_type2;
-            auto type1 = Temperature::define_uon(from, for_type1);
-            auto type2 = Temperature::define_uon(to,   for_type2);
-            error_print(for_type1, for_type2);
-            if(!(for_type1 && for_type2)) { return false; }
-            Temperature temperature;
-            try {
-                temperature.set_type(type1);
-                temperature.set_temperature(value);
-            } catch(const std::exception& e) {
-                std::cerr << "Ошибка: " << e.what() << std::endl;
-                return false;
-            }
-            temperature.print();
-
-            std::cout << " -->convert to--> ";
-            temperature.set_type(type2);
-            temperature.print();
-            std::cout << std::endl;
-            return true;
-        }
-        case weight: {
-            bool for_type1, for_type2;
-            auto type1 = Weight::define_uon(from, for_type1);
-            auto type2 = Weight::define_uon(to,   for_type2);
-            error_print(for_type1, for_type2);
-            if(!(for_type1 && for_type2)) { return false; }
-            Weight weight;
-            try {
-                weight.set_type(type1);
-                weight.set_weight(value);
-            } catch(const std::exception& e) {
-                std::cerr << "Ошибка: " << e.what() << std::endl;
-                return false;
-            }
-            weight.print();
-
-            std::cout << "-->convert to--> ";
-            weight.set_type(type2);
-            weight.print();
-            std::cout << std::endl;
-            return true;
-        }
-        case length: {
-            bool for_type1, for_type2;
-            auto type1 = Length::define_uon(from, for_type1);
-            auto type2 = Length::define_uon(to,   for_type2);
-            error_print(for_type1, for_type2);
-            if(!(for_type1 && for_type2)) { return false; }
-            Length length;
-            try {
-                length.set_type(type1);
-                length.set_length(value);
-            } catch(const std::exception& e) {
-                std::cerr << "Ошибка: " << e.what() << std::endl;
-                return false;
-            }
-            length.print();
-
-            std::cout << "-->convert to--> ";
-            length.set_type(type2);
-            length.print();
-            std::cout << std::endl;
-            return true;
-        }
-    }
-    return false;
-}
-
-bool define_Type(const char* type_str, Types* type) {
-    if(strcmp(type_str,"temperature") == 0) {
-        *type = temperature;
-        return true;
-    }
-    if(strcmp(type_str,"weight") == 0) {
-        *type = weight;
-        return true;
-    }
-    if(strcmp(type_str,"length") == 0) {
-        *type = length;
-        return true;
-    }
-    return false;
-}
-
+void print_usage();
+void error_print(bool, bool);
+bool define_Type(const char* type_str, Types* type);
+template <typename T>
+bool convert(double, const char*, const char*);
 
 
 int main(int argc, const char** argv)
@@ -172,7 +41,29 @@ int main(int argc, const char** argv)
         return -2;
     }
 
-    if(convert(type, atof(argv[2]), argv[3], argv[4])){
+    double value;
+    try {
+        value = std::stod(argv[2]);
+    } catch (const std::exception&) {
+        std::cout << "Error: value must be a number!" << std::endl;
+        return -3;
+    }
+
+    bool result;
+
+    switch(type) {
+    case Types::Temperature:
+        result = convert<Temperature>(value, argv[3], argv[4]);
+        break;
+    case Types::Weight:
+        result = convert<Weight>(value, argv[3], argv[4]);
+        break;
+    case Types::Length:
+        result = convert<Length>(value, argv[3], argv[4]);
+        break;
+    }
+
+    if(result){
         std::cout <<
             "Succes!"
                   <<
@@ -186,4 +77,89 @@ int main(int argc, const char** argv)
     }
 
     return 0;
+}
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+template <typename T>
+bool convert(double value, const char* from, const char* to) {
+    bool ok1, ok2;
+    auto type1 = T::define_uon(from, ok1);
+    auto type2 = T::define_uon(to, ok2);
+    error_print(ok1, ok2);
+    if (!(ok1 && ok2)) return false;
+
+    T unit;
+    try {
+        unit.set_type(type1);
+        unit.set_value(value);
+    } catch (const std::exception& e) {
+        std::cerr << "Ошибка: " << e.what() << std::endl;
+        return false;
+    }
+    unit.print();
+    std::cout << " -->convert to--> ";
+    unit.set_type(type2);
+    unit.print();
+    std::cout << std::endl;
+    return true;
+}
+
+bool define_Type(const char* type_str, Types* type) {
+    if(strcmp(type_str,"temperature") == 0) {
+        *type = Types::Temperature;
+        return true;
+    }
+    if(strcmp(type_str,"weight") == 0) {
+        *type = Types::Weight;
+        return true;
+    }
+    if(strcmp(type_str,"length") == 0) {
+        *type = Types::Length;
+        return true;
+    }
+    return false;
+}
+///////////////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+
+void print_usage() {
+    std::cout <<
+        "Usage: converter <type> <value> <from> <to>"
+              <<
+        std::endl;
+    std::cout <<
+        "  type: temperature | weight | length"
+              <<
+        std::endl;
+    std::cout <<
+        "  temperature units: C, F, K"
+              <<
+        std::endl;
+    std::cout <<
+        "  weight units: kg, lb, g, oz"
+              <<
+        std::endl;
+    std::cout <<
+        "  length units: km, m, cm, mm"
+              <<
+        std::endl;
+    std::cout <<
+        "Example: converter temperature 100 C F"
+              <<
+        std::endl;
+}
+void error_print(bool for_type1, bool for_type2) {
+    if(!for_type1) {
+        std::cout <<
+            "Error: param1 is wrong"
+                  <<
+            std::endl;
+    }
+    if(!for_type2) {
+        std::cout <<
+            "Error: param2 is wrong"
+                  <<
+            std::endl;
+    }
 }

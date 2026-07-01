@@ -23,9 +23,9 @@ public:
     {  }
 
     void set_type(Type type);
-    void set_weight(double weight);
+    void set_value(double weight);
 
-    double get_weight() const;
+    double get_value() const;
     Type get_type() const;
 
     static Type define_uon(const char* str, bool& uon);
